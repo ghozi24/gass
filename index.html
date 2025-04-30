@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Aplikasi Kasir Teh NyaTAW" />
+    <title>Kasir Teh NyaTAW</title>
+    <style>
+      /* ===== VARIABEL WARNA & TEMA ===== */
+      :root {
+        --primary-color: #2b8a3e;
+        --secondary-color: #17a2b8;
+        --danger-color: #dc3545;
+        --success-color: #28a745;
+        --border-color: #ddd;
+        --text-color: #333;
+        --light-bg: #f5f5f5;
+        --white: #ffffff;
+      }
+
+      /* ===== RESET DAN PENGATURAN DASAR ===== */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 10px;
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        -webkit-text-size-adjust: 100%;
+        line-height: 1.5;
+      }
+
+      /* ===== KOMPONEN LOGO ===== */
+      .logo {
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      /* ===== KOMPONEN MENU ===== */
+      .menu-button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin: 5px 0;
+        background-color: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+      }
+
+      .menu-button:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .menu-button:active {
+        transform: translateY(0);
+      }
+
+      #menu-category {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      /* ===== STRUK / RECEIPT ===== */
+      #receipt {
+        background: var(--white);
+        padding: 15px;
+        margin-top: 15px;
+        /* Ukuran font dan lebar disesuaikan untuk printer thermal 58mm */
+        font-size: 12px; /* Ukuran font yang lebih kecil untuk printer thermal */
+        max-width: 58mm; /* Standar lebar kertas thermal 58mm */
+        width: 100%; /* Memastikan responsif pada layar kecil */
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      /* ===== TOMBOL AKSI ===== */
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        min-width: 100px;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .action-buttons button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+
+      .action-buttons button:active {
+        transform: translateY(0);
+      }
+
+      /* ===== METODE PEMBAYARAN ===== */
+      .payment-method {
+        margin-top: 10px;
+        background: var(--white);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      .payment-method label {
+        margin-right: 15px;
+        cursor: pointer;
+      }
+
+      /* ===== GRUP INPUT ===== */
+      .input-group {
+        margin-bottom: 10px;
+        background: var(--white);
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      /* ===== MODAL LAPORAN ===== */
+      #report-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        padding: 20px;
+        box-sizing: border-box;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .report-container {
+        background: var(--white);
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 80vh;
+        overflow: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .report-item {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .report-item:last-child {
+        border-bottom: none;
+      }
+
+      .btn-close {
+        padding: 10px;
+        background: var(--danger-color);
+        color: var(--white);
+        border: none;
+        border-radius: 4px;
+        margin-top: 15px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .btn-whatsapp {
+        padding: 12px;
+        background: #25d366;
+        color: var(--white);
+        border: none;
+        border-radius: 6px;
+        width: 100%;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      /* ===== ATURAN PRINT ===== */
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #receipt,
+        #receipt * {
+          visibility: visible;
+        }
+        #receipt {
+          position: absolute;
+          left: 0;
+          top: 0;
+          /* Optimalisasi untuk printer thermal 58mm */
+          width: 58mm !important; /* Lebar tetap 58mm saat dicetak */
+          padding: 0 !important; /* Menghilangkan padding saat cetak */
+          margin: 0 !important; /* Menghilangkan margin saat cetak */
+          border: none !important;
+          box-shadow: none !important;
+          font-size: 12px !important; /* Ukuran font fixed untuk thermal */
+        }
+        /* Mengurangi margin pada elemen dalam struk saat cetak */
+        #receipt div,
+        #receipt p {
+          margin: 2px 0 !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
+
+      /* ===== RESPONSIVITAS ===== */
+      @media (max-width: 480px) {
+        .action-buttons {
+          flex-direction: column;
+        }
+        .action-buttons button {
+          width: 100%;
+        }
+
+        /* Pastikan struk tetap pas di layar mobile */
+        #receipt {
+          max-width: 100%;
+        }
+      }
+
+      /* ===== ANIMASI ===== */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      /* ===== NOTIFIKASI TOAST ===== */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        display: none;
+      }
+
+      /* ===== HEADER STRUK ===== */
+      .receipt-header {
+        text-align: center;
+        margin-bottom: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .receipt-logo {
+        max-width: 60px; /* Mengubah dari 200px menjadi 100% untuk tampilan lebih baik */
+        width: 60px; /* Ukuran logo yang lebih kecil */
+        height: auto;
+        margin: 0 auto;
+        display: block;
+      }
+
+      /* Optimalisasi logo untuk printer thermal */
+      @media print {
+        .receipt-logo {
+          max-width: 60px !important; /* Ukuran logo saat dicetak */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Bagian logo di halaman utama -->
+    <div class="no-print" style="text-align: center; margin-bottom: 15px">
+      <img
+        src="logoo.png"
+        alt="Logo Teh NyaTAW"
+        style="max-width: 300px; height: auto"
+      />
+      <p style="margin: 3px 0; font-size: 12px">Pusat</p>
+    </div>
+
+    <!-- Bagian Pemilihan Menu -->
+    <div class="menu-section no-print">
+      <div style="margin-bottom: 10px">
+        <select
+          id="menu-category"
+          style="width: 100%; padding: 10px; border-radius: 8px"
+        >
+          <option value="standard">Standard</option>
+          <option value="signature">Signature</option>
+          <option value="special">Special</option>
+        </select>
+      </div>
+
+      <!-- Menu Standard -->
+      <div id="standard-menu">
+        <button
+          class="menu-button"
+          onclick="addItem('Teh Kecil Reguler', 3000)"
+        >
+          Teh Kecil - Rp3.000
+        </button>
+        <button
+          class="menu-button"
+          onclick="addItem('Teh Besar Reguler', 5000)"
+        >
+          Teh Besar - Rp5.000
+        </button>
+      </div>
+
+      <!-- Menu Signature -->
+      <div id="signature-menu" style="display: none">
+        <button class="menu-button" onclick="addItem('Teh Kecil Lemon', 5000)">
+          Teh Kecil Lemon - Rp5.000
+        </button>
+        <button class="menu-button" onclick="addItem('Teh Kecil Jahe', 5000)">
+          Teh Kecil Jahe - Rp5.000
+        </button>
+        <button class="menu-button" onclick="addItem('Teh Besar Lemon', 7000)">
+          Teh Besar Lemon - Rp7.000
+        </button>
+        <button class="menu-button" onclick="addItem('Teh Besar Jahe', 7000)">
+          Teh Besar Jahe - Rp7.000
+        </button>
+      </div>
+
+      <!-- Menu Special -->
+      <div id="special-menu" style="display: none">
+        <button class="menu-button" onclick="addItem('Es Teh Susu', 8000)">
+          Es Teh Susu - Rp8.000
+        </button>
+        <button class="menu-button" onclick="addItem('Es Teh Tarik', 10000)">
+          Es Teh Tarik - Rp10.000
+        </button>
+        <button class="menu-button" onclick="addItem('Glory Cheese', 31000)">
+          Glory Cheese - Rp31.000
+        </button>
+        <button class="menu-button" onclick="addItem('Mozarella Corn', 16000)">
+          Mozarella Corn - Rp16.000
+        </button>
+      </div>
+    </div>
+
+    <!-- Input Nama Kasir -->
+    <div class="input-group no-print">
+      <input
+        id="cashier-input"
+        type="text"
+        placeholder="Nama Kasir"
+        value="Admin"
+        oninput="updateCashierName()"
+      />
+    </div>
+
+    <!-- Input Nama Customer -->
+    <div class="input-group no-print">
+      <input
+        id="customer-input"
+        type="text"
+        placeholder="Nama Customer (Opsional)"
+        oninput="updateCustomerName()"
+      />
+    </div>
+
+    <!-- Pilihan Metode Pembayaran -->
+    <div class="payment-method no-print">
+      <label
+        ><input
+          type="radio"
+          name="payment"
+          value="tunai"
+          checked
+          onclick="updatePaymentMethod()"
+        />
+        Tunai</label
+      >
+      <label
+        ><input
+          type="radio"
+          name="payment"
+          value="qris"
+          onclick="updatePaymentMethod()"
+        />
+        QRIS</label
+      >
+    </div>
+
+    <!-- Input Jumlah Bayar -->
+    <div class="input-group no-print">
+      <input
+        id="pay"
+        type="number"
+        placeholder="Jumlah Bayar"
+        min="0"
+        oninput="calculateChange()"
+      />
+    </div>
+
+    <!-- Bagian Struk dengan Logo -->
+    <div id="receipt" class="fade-in">
+      <!-- Header Struk dengan Logo -->
+      <div class="receipt-header">
+        <img src="logoo.png" alt="Teh NyaTAW Logo" class="receipt-logo" />
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+
+      <!-- Informasi transaksi -->
+      <div style="display: flex; justify-content: space-between">
+        <span>Kasir:</span>
+        <span id="cashier-name">Admin</span>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <span>Customer:</span>
+        <span id="customer-name">-</span>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <span>Waktu:</span>
+        <span id="receipt-date"></span>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <span>No. Struk:</span>
+        <span id="invoice-number">#INV-0001</span>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <span>Pembayaran:</span>
+        <span id="payment-method">Tunai</span>
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+
+      <!-- Status LUNAS -->
+      <div style="text-align: center; margin: 8px 0">
+        <strong style="font-size: 14px">### LUNAS ###</strong>
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+      <!-- Daftar item yang dibeli -->
+      <div id="item-list"></div>
+
+      <hr style="border-top: 1px dashed #000" />
+      <!-- Subtotal -->
+      <div style="display: flex; justify-content: space-between">
+        <span>Subtotal</span>
+        <span>Rp<span id="subtotal">0</span></span>
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+      <!-- Total -->
+      <div
+        style="display: flex; justify-content: space-between; font-weight: bold"
+      >
+        <span>Total (<span id="total-items">0</span> Produk)</span>
+        <span>Rp<span id="total">0</span></span>
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+      <!-- Detail pembayaran -->
+      <div style="display: flex; justify-content: space-between">
+        <span id="payment-label">Bayar</span>
+        <span>Rp<span id="payment-display">0</span></span>
+      </div>
+      <div style="display: flex; justify-content: space-between">
+        <span>Kembali</span>
+        <span>Rp<span id="change">0</span></span>
+      </div>
+
+      <hr style="border-top: 1px dashed #000" />
+      <!-- Footer struk -->
+      <div style="text-align: center; font-size: 11px">
+        <p>Terima kasih telah berbelanja</p>
+        <p>PizzaLebar-Mojokerto</p>
+      </div>
+    </div>
+
+    <!-- Tombol aksi -->
+    <!-- Tambahkan ini di atas tombol aksi (action-buttons) -->
+    <div
+      class="bluetooth-section no-print"
+      style="
+        margin-top: 15px;
+        background: var(--white);
+        padding: 15px;
+        border-radius: 8px;
+      "
+    >
+      <h3 style="margin-top: 0; color: var(--primary-color)">
+        Printer Bluetooth
+      </h3>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+        "
+      >
+        <span>Status:</span>
+        <span id="bluetooth-status">Tidak terhubung</span>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 10px">
+        <button
+          id="btn-connect"
+          onclick="connectBluetooth()"
+          style="
+            background: var(--secondary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            flex: 1;
+            cursor: pointer;
+          "
+        >
+          Hubungkan Printer
+        </button>
+        <button
+          id="btn-print-bluetooth"
+          onclick="printToBluetoothPrinter()"
+          disabled
+          style="
+            background: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            flex: 1;
+            cursor: pointer;
+          "
+        >
+          Cetak via Bluetooth
+        </button>
+      </div>
+      <!-- Added debug information section -->
+      <div
+        id="bluetooth-debug"
+        style="
+          font-size: 12px;
+          margin-top: 10px;
+          background: #f8f9fa;
+          padding: 10px;
+          border-radius: 4px;
+          display: none;
+        "
+      >
+        <strong>Informasi Debug:</strong>
+        <div id="debug-info"></div>
+      </div>
+      <!-- Added printer selection -->
+      <div style="margin-top: 10px">
+        <select
+          id="printer-profile"
+          style="
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+          "
+        >
+          <option value="generic">Printer Thermal Generic</option>
+          <option value="esc-pos">ESC/POS Printer</option>
+          <option value="zjiang">ZJiang Printer</option>
+          <option value="rongta">RONGTA Printer</option>
+        </select>
+        <button
+          onclick="toggleDebugMode()"
+          style="
+            width: 100%;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+          "
+        >
+          Toggle Mode Debug
+        </button>
+      </div>
+    </div>
+
+    <div class="action-buttons no-print">
+      <button
+        style="background: var(--primary-color); color: white"
+        onclick="printReceipt()"
+      >
+        Cetak Struk
+      </button>
+      <button
+        style="background: var(--secondary-color); color: white"
+        onclick="showReport()"
+      >
+        Laporan
+      </button>
+      <button
+        style="background: var(--danger-color); color: white"
+        onclick="resetReceipt()"
+      >
+        Reset Struk
+      </button>
+    </div>
+
+    <!-- Modal Laporan -->
+    <div id="report-modal">
+      <div class="report-container">
+        <h2 style="margin-top: 0">Laporan Harian</h2>
+        <div style="margin-bottom: 15px">
+          <label
+            >Tanggal:
+            <input
+              type="date"
+              id="report-date"
+              style="
+                padding: 8px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+              "
+            />
+          </label>
+        </div>
+        <div id="report-content">
+          <p>Pilih tanggal untuk melihat laporan</p>
+        </div>
+        <button class="btn-close" onclick="closeReportModal()">Tutup</button>
+        <button class="btn-whatsapp" onclick="sendToWhatsApp()">
+          📱 Kirim ke WhatsApp
+        </button>
+        <button
+          class="btn-reset"
+          onclick="resetAllTransactions()"
+          style="
+            padding: 12px;
+            background: #ffc107;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+          "
+        >
+          🔄 Reset Semua Transaksi
+        </button>
+        <button
+          class="btn-reset-date"
+          onclick="resetTransactionsByDate()"
+          style="
+            padding: 12px;
+            background: #fd7e14;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+          "
+        >
+          🗑️ Reset Transaksi Tanggal Ini
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+      // ===== INISIALISASI VARIABEL =====
+      let items = []; // Array untuk menyimpan item yang ditambahkan
+      let total = 0; // Total harga
+      let paymentMethod = "tunai"; // Metode pembayaran default
+      let transactions = JSON.parse(localStorage.getItem("transactions")) || []; // Riwayat transaksi
+
+      // ===== FUNGSI UTILITAS =====
+      // Format mata uang
+      function formatCurrency(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      // Tampilkan notifikasi toast
+      function showToast(message, duration = 3000) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.display = "block";
+
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, duration);
+      }
+
+      // Generate nomor invoice unik
+      function generateInvoiceNumber() {
+        const now = new Date();
+        const dateStr =
+          now.getDate().toString().padStart(2, "0") +
+          (now.getMonth() + 1).toString().padStart(2, "0") +
+          now.getFullYear().toString().slice(-2);
+        const rand = Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0");
+        return `#INV-${dateStr}${rand}`;
+      }
+
+      // Update tanggal pada struk
+      function updateDate() {
+        const now = new Date();
+        document.getElementById("receipt-date").textContent =
+          now.toLocaleString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+      }
+
+      // ===== FUNGSI UPDATE INPUT =====
+      function updateCashierName() {
+        const cashier =
+          document.getElementById("cashier-input").value || "Admin";
+        document.getElementById("cashier-name").textContent = cashier;
+      }
+
+      function updateCustomerName() {
+        const customer = document.getElementById("customer-input").value || "-";
+        document.getElementById("customer-name").textContent = customer;
+      }
+
+      function updatePaymentMethod() {
+        paymentMethod = document.querySelector(
+          'input[name="payment"]:checked'
+        ).value;
+        document.getElementById("payment-method").textContent =
+          paymentMethod === "qris" ? "QRIS" : "Tunai";
+        document.getElementById("payment-label").textContent =
+          paymentMethod === "qris" ? "Bayar (QRIS)" : "Bayar";
+
+        if (paymentMethod === "qris") {
+          document.getElementById("pay").value = total;
+        }
+
+        calculateChange();
+      }
+
+      // ===== FUNGSI KERANJANG BELANJA =====
+      function addItem(name, price) {
+        items.push({ name, price });
+        updateReceipt();
+        showToast(`${name} ditambahkan`);
+      }
+
+      function updateReceipt() {
+        const itemList = document.getElementById("item-list");
+        itemList.innerHTML = "";
+        total = 0;
+        const itemCounts = {};
+
+        // Hitung jumlah per item
+        items.forEach((item) => {
+          const key = item.name + "-" + item.price;
+          itemCounts[key] = (itemCounts[key] || 0) + 1;
+          total += item.price;
+        });
+
+        // Tampilkan item di struk
+        for (const key in itemCounts) {
+          const [name, price] = key.split("-");
+          const itemDiv = document.createElement("div");
+          itemDiv.style.marginBottom = "5px";
+          itemDiv.innerHTML = `
+            <strong>${name}</strong>
+            <div style="display:flex;justify-content:space-between;">
+              <span>${formatCurrency(price)} x ${itemCounts[key]}</span>
+              <span><strong>Rp${formatCurrency(
+                price * itemCounts[key]
+              )}</strong></span>
+            </div>
+          `;
+          itemList.appendChild(itemDiv);
+        }
+
+        // Update total dan info lain
+        document.getElementById("subtotal").textContent = formatCurrency(total);
+        document.getElementById("total").textContent = formatCurrency(total);
+        document.getElementById("total-items").textContent = items.length;
+        updateCashierName();
+        updateCustomerName();
+        updateDate();
+        calculateChange();
+      }
+
+      // ===== FUNGSI PEMBAYARAN =====
+      function calculateChange() {
+        let pay = parseInt(document.getElementById("pay").value) || 0;
+
+        // Untuk pembayaran QRIS, set jumlah bayar sama dengan total
+        if (paymentMethod === "qris") {
+          pay = total;
+          document.getElementById("pay").value = total;
+        }
+
+        const change = pay - total;
+        document.getElementById("payment-display").textContent =
+          formatCurrency(pay);
+        document.getElementById("change").textContent =
+          change >= 0 ? formatCurrency(change) : "0";
+
+        // Highlight jika jumlah bayar kurang (hanya untuk tunai)
+        if (paymentMethod === "tunai") {
+          document.getElementById("pay").style.borderColor =
+            pay < total ? "var(--danger-color)" : "var(--border-color)";
+        }
+      }
+
+      // ===== FUNGSI CETAK STRUK =====
+      function printReceipt() {
+        // Validasi sebelum mencetak
+        if (items.length === 0) {
+          showToast("Belum ada item yang ditambahkan!");
+          return;
+        }
+
+        if (paymentMethod === "tunai") {
+          const pay = parseInt(document.getElementById("pay").value) || 0;
+          if (pay < total) {
+            showToast("Jumlah bayar kurang!");
+            return;
+          }
+        }
+
+        // Generate nomor invoice baru
+        const invoiceNumber = generateInvoiceNumber();
+        document.getElementById("invoice-number").textContent = invoiceNumber;
+
+        // Simpan transaksi ke localStorage
+        const transaction = {
+          id: invoiceNumber,
+          date: new Date().toISOString(),
+          items: [...items],
+          total: total,
+          paymentMethod: paymentMethod,
+          cashier: document.getElementById("cashier-input").value || "Admin",
+          customer: document.getElementById("customer-input").value || "-",
+          amountPaid:
+            paymentMethod === "qris"
+              ? total
+              : parseInt(document.getElementById("pay").value) || 0,
+        };
+
+        transactions.push(transaction);
+        localStorage.setItem("transactions", JSON.stringify(transactions));
+
+        // Tampilkan notifikasi sebelum mencetak
+        showToast("Mencetak struk...");
+
+        // Delay sebelum print untuk memastikan struk terupdate
+        setTimeout(() => {
+          window.print();
+          resetReceipt();
+        }, 500);
+      }
+
+      function resetReceipt() {
+        items = [];
+        total = 0;
+        document.getElementById("item-list").innerHTML = "";
+        document.getElementById("subtotal").textContent = "0";
+        document.getElementById("total").textContent = "0";
+        document.getElementById("total-items").textContent = "0";
+        document.getElementById("pay").value = "";
+        document.getElementById("change").textContent = "0";
+        document.getElementById("payment-display").textContent = "0";
+        document.getElementById("invoice-number").textContent =
+          generateInvoiceNumber();
+        document.getElementById("customer-input").value = "";
+        updateDate();
+
+        // Reset ke pembayaran tunai
+        document.querySelector(
+          'input[name="payment"][value="tunai"]'
+        ).checked = true;
+        updatePaymentMethod();
+
+        showToast("Struk telah direset");
+      }
+
+      // ===== FUNGSI LAPORAN =====
+      function showReport() {
+        // Set tanggal default ke hari ini
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("report-date").value = today;
+
+        // Tampilkan modal
+        document.getElementById("report-modal").style.display = "flex";
+
+        // Generate laporan untuk tanggal hari ini
+        generateDailyReport(today);
+      }
+
+      function closeReportModal() {
+        document.getElementById("report-modal").style.display = "none";
+      }
+
+      function generateDailyReport(date) {
+        const selectedDate = new Date(date).toISOString().split("T")[0];
+
+        // Filter transaksi berdasarkan tanggal
+        const dailyTransactions = transactions.filter(
+          (trans) => trans.date.split("T")[0] === selectedDate
+        );
+
+        // Hitung total pendapatan
+        const totalRevenue = dailyTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+
+        // Hitung jumlah per item dan total item dipesan
+        const itemCounts = {};
+        let totalItemsOrdered = 0;
+        dailyTransactions.forEach((trans) => {
+          trans.items.forEach((item) => {
+            const key = item.name;
+            itemCounts[key] = (itemCounts[key] || 0) + 1;
+            totalItemsOrdered++;
+          });
+        });
+
+        // Hitung transaksi per metode pembayaran
+        const cashTransactions = dailyTransactions.filter(
+          (trans) => trans.paymentMethod === "tunai"
+        );
+        const qrisTransactions = dailyTransactions.filter(
+          (trans) => trans.paymentMethod === "qris"
+        );
+
+        const cashTotal = cashTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+        const qrisTotal = qrisTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+
+        const reportContainer = document.getElementById("report-content");
+
+        // Tampilkan laporan
+        if (dailyTransactions.length > 0) {
+          let reportHTML = `
+            <div style="margin-bottom: 15px; font-family: sans-serif;">
+              <h2 style="margin-bottom: 8px;">LAPORAN HARIAN TEH NYATAW</h2>
+              <p style="margin: 5px 0;">📅 ${new Date(date).toLocaleDateString(
+                "id-ID",
+                {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                }
+              )}</p>
+
+              <h3 style="margin: 15px 0 5px 0;">📊 Ringkasan Penjualan</h3>
+              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                <li>• Total Transaksi: ${dailyTransactions.length}</li>
+                <li>• Total Pendapatan: Rp${formatCurrency(totalRevenue)}</li>
+                <li>• Total Menu Dipesan: ${totalItemsOrdered}</li>
+              </ul>
+
+              <h3 style="margin: 15px 0 5px 0;">💵 Pembayaran Tunai</h3>
+              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                <li>• Transaksi: ${cashTransactions.length}</li>
+                <li>• Total: Rp${formatCurrency(cashTotal)}</li>
+              </ul>
+
+              <h3 style="margin: 15px 0 5px 0;">📱 Pembayaran QRIS</h3>
+              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                <li>• Transaksi: ${qrisTransactions.length}</li>
+                <li>• Total: Rp${formatCurrency(qrisTotal)}</li>
+              </ul>
+
+              <h3 style="margin: 15px 0 5px 0;">📋 Detail Penjualan Produk</h3>
+              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+          `;
+
+          // Tambahkan detail penjualan per item
+          for (const itemName in itemCounts) {
+            // Cari harga produk dari transaksi
+            const itemPrice =
+              dailyTransactions
+                .find((trans) =>
+                  trans.items.some((item) => item.name === itemName)
+                )
+                ?.items.find((item) => item.name === itemName)?.price || 0;
+
+            const totalItemPrice = itemPrice * itemCounts[itemName];
+            reportHTML += `<li>• ${itemName}: ${
+              itemCounts[itemName]
+            }x (Rp${formatCurrency(totalItemPrice)})</li>`;
+          }
+
+          reportHTML += `</ul></div>
+            <div>
+              <h3>Detail Transaksi:</h3>
+            </div>
+          `;
+
+          // Tambahkan detail setiap transaksi
+          dailyTransactions.forEach((trans, index) => {
+            reportHTML += `
+              <div class="report-item">
+                <strong>${trans.id}</strong> - ${new Date(
+              trans.date
+            ).toLocaleString("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}<br>
+                Kasir: ${trans.cashier}<br>
+                Customer: ${trans.customer}<br>
+                Metode: ${trans.paymentMethod === "qris" ? "QRIS" : "Tunai"}<br>
+                Total: Rp${formatCurrency(trans.total)}<br>
+                <strong>Item:</strong>
+                <ul style="margin-top: 5px; padding-left: 20px;">
+            `;
+
+            // Count item untuk transaksi ini
+            const transItemCounts = {};
+            trans.items.forEach((item) => {
+              const key = item.name;
+              transItemCounts[key] = (transItemCounts[key] || 0) + 1;
+            });
+
+            // Tampilkan item dalam transaksi
+            for (const itemName in transItemCounts) {
+              reportHTML += `<li>${itemName} x${transItemCounts[itemName]}</li>`;
+            }
+
+            reportHTML += `</ul></div>`;
+          });
+
+          reportContainer.innerHTML = reportHTML;
+        } else {
+          reportContainer.innerHTML = `<p>Tidak ada transaksi pada tanggal ${new Date(
+            date
+          ).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}</p>`;
+        }
+      }
+
+      function sendToWhatsApp() {
+        const date = document.getElementById("report-date").value;
+        const selectedDate = new Date(date).toISOString().split("T")[0];
+
+        // Filter transaksi berdasarkan tanggal
+        const dailyTransactions = transactions.filter(
+          (trans) => trans.date.split("T")[0] === selectedDate
+        );
+
+        // Hitung total pendapatan
+        const totalRevenue = dailyTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+
+        // Hitung jumlah per item dan total item dipesan
+        const itemCounts = {};
+        let totalItemsOrdered = 0;
+        dailyTransactions.forEach((trans) => {
+          trans.items.forEach((item) => {
+            const key = item.name;
+            itemCounts[key] = (itemCounts[key] || 0) + 1;
+            totalItemsOrdered++;
+          });
+        });
+
+        // Hitung transaksi per metode pembayaran
+        const cashTransactions = dailyTransactions.filter(
+          (trans) => trans.paymentMethod === "tunai"
+        );
+        const qrisTransactions = dailyTransactions.filter(
+          (trans) => trans.paymentMethod === "qris"
+        );
+
+        const cashTotal = cashTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+        const qrisTotal = qrisTransactions.reduce(
+          (sum, trans) => sum + trans.total,
+          0
+        );
+
+        // Format untuk WhatsApp
+        let reportText = `*LAPORAN HARIAN TEH NYATAW*\n`;
+        reportText += `📅 ${new Date(date).toLocaleDateString("id-ID", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })}\n\n`;
+
+        reportText += `📊 *Ringkasan Penjualan*\n`;
+        reportText += `• Total Transaksi: ${dailyTransactions.length}\n`;
+        reportText += `• Total Pendapatan: Rp${formatCurrency(totalRevenue)}\n`;
+        reportText += `• Total Menu Dipesan: ${totalItemsOrdered}\n\n`;
+
+        reportText += `💵 *Pembayaran Tunai*\n`;
+        reportText += `• Transaksi: ${cashTransactions.length}\n`;
+        reportText += `• Total: Rp${formatCurrency(cashTotal)}\n\n`;
+
+        reportText += `📱 *Pembayaran QRIS*\n`;
+        reportText += `• Transaksi: ${qrisTransactions.length}\n`;
+        reportText += `• Total: Rp${formatCurrency(qrisTotal)}\n\n`;
+
+        reportText += `📋 *Detail Penjualan Produk*\n`;
+        for (const itemName in itemCounts) {
+          // Cari harga produk dari transaksi
+          const itemPrice =
+            dailyTransactions
+              .find((trans) =>
+                trans.items.some((item) => item.name === itemName)
+              )
+              ?.items.find((item) => item.name === itemName)?.price || 0;
+
+          const totalItemPrice = itemPrice * itemCounts[itemName];
+          reportText += `• ${itemName}: ${
+            itemCounts[itemName]
+          }x (Rp${formatCurrency(totalItemPrice)})\n`;
+        }
+
+        // Encode untuk URL WhatsApp
+        const encodedText = encodeURIComponent(reportText);
+        const whatsappURL = `https://wa.me/?text=${encodedText}`;
+
+        // Buka WhatsApp di tab baru
+        window.open(whatsappURL, "_blank");
+      }
+
+      // ===== FUNGSI RESET SEMUA TRANSAKSI =====
+      // Menghapus semua data transaksi
+      function resetAllTransactions() {
+        if (confirm("Yakin ingin menghapus SEMUA riwayat transaksi?")) {
+          transactions = [];
+          localStorage.setItem("transactions", JSON.stringify(transactions));
+          showToast("Semua transaksi telah dihapus");
+          generateDailyReport(document.getElementById("report-date").value);
+        }
+      }
+
+      // ===== FUNGSI RESET TRANSAKSI BERDASARKAN TANGGAL =====
+      // Menghapus transaksi pada tanggal tertentu
+      function resetTransactionsByDate() {
+        const date = document.getElementById("report-date").value;
+        const selectedDate = new Date(date).toISOString().split("T")[0];
+
+        if (
+          confirm(
+            `Yakin ingin menghapus transaksi tanggal ${new Date(
+              date
+            ).toLocaleDateString("id-ID")}?`
+          )
+        ) {
+          // Filter transaksi yang tidak pada tanggal yang dipilih
+          transactions = transactions.filter(
+            (trans) => trans.date.split("T")[0] !== selectedDate
+          );
+          localStorage.setItem("transactions", JSON.stringify(transactions));
+          showToast(
+            `Transaksi tanggal ${new Date(date).toLocaleDateString(
+              "id-ID"
+            )} telah dihapus`
+          );
+          generateDailyReport(date);
+        }
+      }
+
+      // ===== EVENT LISTENER =====
+      // Menambahkan event listener untuk menangani input dan perubahan
+
+      // Listener untuk perubahan kategori menu
+      document
+        .getElementById("menu-category")
+        .addEventListener("change", function () {
+          // Sembunyikan semua menu
+          document.getElementById("standard-menu").style.display = "none";
+          document.getElementById("signature-menu").style.display = "none";
+          document.getElementById("special-menu").style.display = "none";
+
+          // Tampilkan menu sesuai kategori yang dipilih
+          document.getElementById(`${this.value}-menu`).style.display = "block";
+        });
+
+      // Listener untuk perubahan tanggal laporan
+      document
+        .getElementById("report-date")
+        .addEventListener("change", function () {
+          generateDailyReport(this.value);
+        });
+
+      // Listener untuk input jumlah bayar
+      document.getElementById("pay").addEventListener("input", calculateChange);
+      document
+        .getElementById("pay")
+        .addEventListener("change", calculateChange);
+
+      // Listener untuk input nama kasir
+      document
+        .getElementById("cashier-input")
+        .addEventListener("input", function () {
+          document.getElementById("cashier-name").textContent =
+            this.value || "Admin";
+        });
+
+      // Listener untuk input nama customer
+      document
+        .getElementById("customer-input")
+        .addEventListener("input", function () {
+          document.getElementById("customer-name").textContent =
+            this.value || "-";
+        });
+
+      // ===== INISIALISASI HALAMAN =====
+      // Melakukan inisialisasi saat halaman pertama dimuat
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set nomor invoice
+        document.getElementById("invoice-number").textContent =
+          generateInvoiceNumber();
+
+        // Update tanggal
+        updateDate();
+
+        // Setel interval untuk memperbarui waktu setiap menit
+        setInterval(updateDate, 60000);
+
+        // Tambahkan event untuk menutup modal laporan saat klik di luar
+        document
+          .getElementById("report-modal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              closeReportModal();
+            }
+          });
+      });
+
+      // Keep existing script content, then replace the Bluetooth functions with the following:
+
+      // ===== VARIABEL BLUETOOTH =====
+      let bluetoothDevice = null;
+      let bluetoothCharacteristic = null;
+      let isBluetoothConnected = false;
+      let isDebugMode = false;
+
+      // Common Bluetooth service UUIDs for thermal printers
+      const PRINTER_SERVICES = {
+        generic: {
+          name: "Generic Thermal Printer",
+          services: [
+            "000018f0-0000-1000-8000-00805f9b34fb",
+            "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+            "49535343-fe7d-4ae5-8fa9-9fafd205e455",
+          ],
+          characteristics: [
+            "00002af1-0000-1000-8000-00805f9b34fb",
+            "49535343-8841-43f4-a8d4-ecbe34729bb3",
+            "00002af0-0000-1000-8000-00805f9b34fb",
+          ],
+        },
+        "esc-pos": {
+          name: "ESC/POS Printer",
+          services: ["49535343-fe7d-4ae5-8fa9-9fafd205e455"],
+          characteristics: ["49535343-8841-43f4-a8d4-ecbe34729bb3"],
+        },
+        zjiang: {
+          name: "ZJiang Printer",
+          services: ["0000fee7-0000-1000-8000-00805f9b34fb"],
+          characteristics: ["0000fee8-0000-1000-8000-00805f9b34fb"],
+        },
+        rongta: {
+          name: "RONGTA Printer",
+          services: [
+            "49535343-fe7d-4ae5-8fa9-9fafd205e455",
+            "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+          ],
+          characteristics: [
+            "49535343-1e4d-4bd9-ba61-23c647249616",
+            "49535343-8841-43f4-a8d4-ecbe34729bb3",
+          ],
+        },
+      };
+
+      // Log debug message
+      function logDebug(message) {
+        if (isDebugMode) {
+          const debugInfo = document.getElementById("debug-info");
+          const timestamp = new Date().toLocaleTimeString();
+          debugInfo.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+          // Auto-scroll to the bottom
+          debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+        console.log(message);
+      }
+
+      // Toggle debug mode
+      function toggleDebugMode() {
+        isDebugMode = !isDebugMode;
+        document.getElementById("bluetooth-debug").style.display = isDebugMode
+          ? "block"
+          : "none";
+        if (isDebugMode) {
+          document.getElementById("debug-info").innerHTML = "";
+          logDebug("Mode debug diaktifkan");
+        }
+      }
+
+      // ===== FUNGSI BLUETOOTH =====
+      // Periksa apakah browser mendukung bluetooth
+      function isWebBluetoothSupported() {
+        return "bluetooth" in navigator;
+      }
+
+      // Connect ke printer bluetooth
+      async function connectBluetooth() {
+        if (!isWebBluetoothSupported()) {
+          showToast("Browser Anda tidak mendukung Web Bluetooth");
+          logDebug("ERROR: Browser tidak mendukung Web Bluetooth API");
+          return;
+        }
+
+        try {
+          showToast("Mencari printer Bluetooth...");
+          logDebug("Mencari printer Bluetooth...");
+
+          // Get selected printer profile
+          const profileKey = document.getElementById("printer-profile").value;
+          const printerProfile = PRINTER_SERVICES[profileKey];
+
+          logDebug(`Menggunakan profil printer: ${printerProfile.name}`);
+
+          // Request device with selected profile
+          bluetoothDevice = await navigator.bluetooth.requestDevice({
+            filters: [
+              ...printerProfile.services.map((service) => ({
+                services: [service],
+              })),
+              { namePrefix: "BlueTooth Printer" },
+              { namePrefix: "RONGTA" },
+              { namePrefix: "MPT" },
+              { namePrefix: "PT" },
+              { namePrefix: "MTP" },
+              { namePrefix: "Printer" },
+            ],
+            optionalServices: printerProfile.services,
+          });
+
+          showToast(`Menghubungkan ke ${bluetoothDevice.name}...`);
+          logDebug(`Perangkat ditemukan: ${bluetoothDevice.name}`);
+
+          // Connect ke perangkat
+          logDebug("Mencoba terhubung ke GATT server...");
+          const server = await bluetoothDevice.gatt.connect();
+          logDebug("Berhasil terhubung ke GATT server");
+
+          // Try each service in the profile
+          let service = null;
+          for (const serviceUuid of printerProfile.services) {
+            try {
+              logDebug(`Mencoba service: ${serviceUuid}`);
+              service = await server.getPrimaryService(serviceUuid);
+              logDebug(`Berhasil mendapatkan service: ${serviceUuid}`);
+              break;
+            } catch (e) {
+              logDebug(
+                `Gagal mendapatkan service ${serviceUuid}: ${e.message}`
+              );
+            }
+          }
+
+          if (!service) {
+            throw new Error(
+              "Tidak dapat menemukan service printer yang kompatibel"
+            );
+          }
+
+          // Try each characteristic in the profile
+          bluetoothCharacteristic = null;
+          for (const charUuid of printerProfile.characteristics) {
+            try {
+              logDebug(`Mencoba characteristic: ${charUuid}`);
+              bluetoothCharacteristic = await service.getCharacteristic(
+                charUuid
+              );
+              logDebug(`Berhasil mendapatkan characteristic: ${charUuid}`);
+              break;
+            } catch (e) {
+              logDebug(
+                `Gagal mendapatkan characteristic ${charUuid}: ${e.message}`
+              );
+            }
+          }
+
+          // If we still don't have a characteristic, try getting any available characteristic
+          if (!bluetoothCharacteristic) {
+            logDebug(
+              "Mencoba mendapatkan semua characteristic yang tersedia..."
+            );
+            const characteristics = await service.getCharacteristics();
+            if (characteristics.length > 0) {
+              bluetoothCharacteristic = characteristics[0];
+              logDebug(
+                `Menggunakan characteristic default: ${bluetoothCharacteristic.uuid}`
+              );
+            } else {
+              throw new Error("Tidak ada characteristic yang tersedia");
+            }
+          }
+
+          isBluetoothConnected = true;
+
+          // Update status dan UI
+          document.getElementById(
+            "bluetooth-status"
+          ).textContent = `Terhubung: ${bluetoothDevice.name}`;
+          document.getElementById("btn-connect").textContent = "Ganti Printer";
+          document.getElementById("btn-print-bluetooth").disabled = false;
+
+          showToast(`Berhasil terhubung ke ${bluetoothDevice.name}`);
+          logDebug(`Koneksi berhasil ke ${bluetoothDevice.name}`);
+
+          // Event ketika perangkat terputus
+          bluetoothDevice.addEventListener(
+            "gattserverdisconnected",
+            onDisconnected
+          );
+        } catch (error) {
+          console.error("Bluetooth Error:", error);
+          logDebug(`ERROR: ${error.message}`);
+          showToast(`Error: ${error.message}`);
+          isBluetoothConnected = false;
+        }
+      }
+
+      // Fungsi yang dipanggil ketika perangkat terputus
+      function onDisconnected() {
+        showToast(`Perangkat ${bluetoothDevice.name} terputus`);
+        logDebug(`Perangkat ${bluetoothDevice.name} terputus`);
+        isBluetoothConnected = false;
+        document.getElementById("bluetooth-status").textContent =
+          "Tidak terhubung";
+        document.getElementById("btn-connect").textContent =
+          "Hubungkan Printer";
+        document.getElementById("btn-print-bluetooth").disabled = true;
+      }
+
+      // Fungsi untuk membuat dan mengirim data ke printer
+      async function printToBluetoothPrinter() {
+        if (!isBluetoothConnected) {
+          showToast("Printer tidak terhubung");
+          logDebug("Gagal mencetak: Printer tidak terhubung");
+          return;
+        }
+
+        // Validasi sebelum mencetak
+        if (items.length === 0) {
+          showToast("Belum ada item yang ditambahkan!");
+          return;
+        }
+
+        if (paymentMethod === "tunai") {
+          const pay = parseInt(document.getElementById("pay").value) || 0;
+          if (pay < total) {
+            showToast("Jumlah bayar kurang!");
+            return;
+          }
+        }
+
+        try {
+          showToast("Mencetak ke printer Bluetooth...");
+          logDebug("Memulai proses cetak Bluetooth...");
+
+          // Generate nomor invoice baru
+          const invoiceNumber = generateInvoiceNumber();
+          document.getElementById("invoice-number").textContent = invoiceNumber;
+
+          // Buat data untuk dicetak
+          const dataToPrint = generatePrintData(invoiceNumber);
+          logDebug(`Data cetak dibuat: ${dataToPrint.length} karakter`);
+
+          // Ubah string menjadi ArrayBuffer
+          const encoder = new TextEncoder();
+          const data = encoder.encode(dataToPrint);
+          logDebug(`Data dikonversi ke Uint8Array: ${data.length} bytes`);
+
+          // Kirim data ke printer dalam chunk untuk menghindari buffer overflow
+          const CHUNK_SIZE = 512; // Chunk size in bytes
+          for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+            const chunk = data.slice(i, i + CHUNK_SIZE);
+            logDebug(
+              `Mengirim chunk ${Math.floor(i / CHUNK_SIZE) + 1}/${Math.ceil(
+                data.length / CHUNK_SIZE
+              )}: ${chunk.length} bytes`
+            );
+            await bluetoothCharacteristic.writeValue(chunk);
+
+            // Add a small delay between chunks
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+
+          logDebug("Semua data berhasil dikirim ke printer");
+
+          // Simpan transaksi ke localStorage
+          const transaction = {
+            id: invoiceNumber,
+            date: new Date().toISOString(),
+            items: [...items],
+            total: total,
+            paymentMethod: paymentMethod,
+            cashier: document.getElementById("cashier-input").value || "Admin",
+            customer: document.getElementById("customer-input").value || "-",
+            amountPaid:
+              paymentMethod === "qris"
+                ? total
+                : parseInt(document.getElementById("pay").value) || 0,
+          };
+
+          transactions.push(transaction);
+          localStorage.setItem("transactions", JSON.stringify(transactions));
+
+          showToast("Pencetakan Bluetooth selesai");
+          logDebug("Proses cetak selesai");
+
+          // Reset setelah cetak
+          setTimeout(() => {
+            resetReceipt();
+          }, 500);
+        } catch (error) {
+          console.error("Print Error:", error);
+          logDebug(`ERROR CETAK: ${error.message}`);
+          showToast(`Print Error: ${error.message}`);
+        }
+      }
+
+      // Fungsi untuk menghasilkan data yang akan dicetak dengan kompatibilitas yang lebih baik
+      function generatePrintData(invoiceNumber) {
+        // Dapatkan waktu saat ini
+        const now = new Date();
+        const dateString = now.toLocaleString("id-ID", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        const cashier = document.getElementById("cashier-name").textContent;
+        const customer = document.getElementById("customer-name").textContent;
+        const paymentMethodText =
+          document.getElementById("payment-method").textContent;
+
+        // ESC/POS commands
+        const ESC = "\x1B";
+        const GS = "\x1D";
+        const INIT = ESC + "@"; // Initialize printer
+        const CENTER = ESC + "a" + "\x01"; // Center alignment
+        const LEFT = ESC + "a" + "\x00"; // Left alignment
+        const RIGHT = ESC + "a" + "\x02"; // Right alignment
+        const BOLD_ON = ESC + "E" + "\x01"; // Bold on
+        const BOLD_OFF = ESC + "E" + "\x00"; // Bold off
+        const CUT = GS + "V" + "\x41" + "\x03"; // Paper cut
+        const NORMAL_SIZE = ESC + "!" + "\x00"; // Normal text size
+        const DOUBLE_HEIGHT = ESC + "!" + "\x10"; // Double height text
+
+        // Mulai membuat data untuk dicetak
+        let printData = INIT; // Initialize printer
+        printData += CENTER; // Center alignment
+
+        // Tambahkan header
+        // printData +=
+        //   DOUBLE_HEIGHT + BOLD_ON + "Teh NyaTAW\n" + NORMAL_SIZE + BOLD_OFF;
+        // printData += "PizzaLebar-Mojokerto\n\n";
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Info transaksi dengan aligned left
+        printData += LEFT; // Left alignment
+        printData += `Kasir    : ${cashier}\n`;
+        printData += `Customer : ${customer}\n`;
+        printData += `Waktu    : ${dateString}\n`;
+        printData += `No. Struk: ${invoiceNumber}\n`;
+        printData += `Pembayaran: ${paymentMethodText}\n`;
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Status LUNAS di tengah
+        printData += CENTER; // Center alignment
+        printData += BOLD_ON + "### LUNAS ###\n" + BOLD_OFF;
+        printData += LEFT; // Left alignment
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Daftar item
+        const itemCounts = {};
+
+        // Hitung jumlah per item
+        items.forEach((item) => {
+          const key = item.name + "-" + item.price;
+          itemCounts[key] = (itemCounts[key] || 0) + 1;
+        });
+
+        // Tampilkan item
+        for (const key in itemCounts) {
+          const [name, price] = key.split("-");
+          printData += `${name}\n`;
+          printData += `${formatCurrency(price)} x ${itemCounts[key]}`;
+
+          // Align right untuk harga total
+          const totalItemPrice = formatCurrency(price * itemCounts[key]);
+          const spaces =
+            32 -
+            (formatCurrency(price).length +
+              3 +
+              itemCounts[key].toString().length +
+              totalItemPrice.length +
+              2);
+          printData += " ".repeat(spaces) + `Rp${totalItemPrice}\n`;
+        }
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Subtotal
+        printData += "Subtotal";
+        const subtotalPrice = formatCurrency(total);
+        const subtotalSpaces =
+          32 - ("Subtotal".length + subtotalPrice.length + 2);
+        printData += " ".repeat(subtotalSpaces) + `Rp${subtotalPrice}\n`;
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Total
+        printData += BOLD_ON;
+        printData += `Total (${items.length} Produk)`;
+        const totalPrice = formatCurrency(total);
+        const totalSpaces =
+          32 -
+          (`Total (${items.length} Produk)`.length + totalPrice.length + 2);
+        printData += " ".repeat(totalSpaces) + `Rp${totalPrice}\n`;
+        printData += BOLD_OFF;
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Bayar
+        const paymentLabel =
+          paymentMethod === "qris" ? "Bayar (QRIS)" : "Bayar";
+        const payment =
+          paymentMethod === "qris"
+            ? total
+            : parseInt(document.getElementById("pay").value) || 0;
+
+        printData += paymentLabel;
+        const paymentAmount = formatCurrency(payment);
+        const paymentSpaces =
+          32 - (paymentLabel.length + paymentAmount.length + 2);
+        printData += " ".repeat(paymentSpaces) + `Rp${paymentAmount}\n`;
+
+        // Kembali
+        const change = Math.max(0, payment - total);
+        printData += "Kembali";
+        const changeAmount = formatCurrency(change);
+        const changeSpaces = 32 - ("Kembali".length + changeAmount.length + 2);
+        printData += " ".repeat(changeSpaces) + `Rp${changeAmount}\n`;
+
+        // Garis pembatas
+        printData += "--------------------------------\n";
+
+        // Footer center alignment
+        printData += CENTER; // Center alignment
+        printData += "Terima kasih telah berbelanja\n";
+
+        // Tambahkan beberapa baris kosong untuk mempermudah pemotongan
+        printData += "\n\n\n\n";
+
+        // Cut paper - jika printer mendukung
+        printData += CUT;
+
+        return printData;
+      }
+    </script>
+  </body>
+</html>
