@@ -622,6 +622,79 @@
       </div>
     </div>
 
+    <!-- USB OTG Printer Section -->
+    <div
+      class="usb-section no-print"
+      style="
+        margin-top: 15px;
+        background: var(--white);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      "
+    >
+      <h3 style="margin-top: 0; color: var(--primary-color)">
+        Printer USB OTG
+      </h3>
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+        "
+      >
+        <span>Status:</span>
+        <span id="usb-status">Tidak terhubung</span>
+      </div>
+      <div style="display: flex; gap: 10px; margin-bottom: 10px">
+        <button
+          id="btn-connect-usb"
+          onclick="connectUSBPrinter()"
+          style="
+            background: var(--secondary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            flex: 1;
+            cursor: pointer;
+          "
+        >
+          Hubungkan Printer USB OTG
+        </button>
+        <button
+          id="btn-print-usb"
+          onclick="printToUSBPrinter()"
+          disabled
+          style="
+            background: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            flex: 1;
+            cursor: pointer;
+          "
+        >
+          Cetak via USB OTG
+        </button>
+      </div>
+      <div
+        id="usb-debug"
+        style="
+          font-size: 12px;
+          margin-top: 10px;
+          background: #f8f9fa;
+          padding: 10px;
+          border-radius: 4px;
+          display: none;
+        "
+      >
+        <strong>Informasi Debug USB:</strong>
+        <div id="debug-info-usb"></div>
+      </div>
+    </div>
+
     <div class="action-buttons no-print">
       <button
         style="background: var(--primary-color); color: white"
@@ -812,14 +885,14 @@
           const itemDiv = document.createElement("div");
           itemDiv.style.marginBottom = "5px";
           itemDiv.innerHTML = `
-            <strong>${name}</strong>
-            <div style="display:flex;justify-content:space-between;">
-              <span>${formatCurrency(price)} x ${itemCounts[key]}</span>
-              <span><strong>Rp${formatCurrency(
-                price * itemCounts[key]
-              )}</strong></span>
-            </div>
-          `;
+                  <strong>${name}</strong>
+                  <div style="display:flex;justify-content:space-between;">
+                    <span>${formatCurrency(price)} x ${itemCounts[key]}</span>
+                    <span><strong>Rp${formatCurrency(
+                      price * itemCounts[key]
+                    )}</strong></span>
+                  </div>
+                `;
           itemList.appendChild(itemDiv);
         }
 
@@ -992,40 +1065,41 @@
         // Tampilkan laporan
         if (dailyTransactions.length > 0) {
           let reportHTML = `
-            <div style="margin-bottom: 15px; font-family: sans-serif;">
-              <h2 style="margin-bottom: 8px;">LAPORAN HARIAN TEH NYATAW</h2>
-              <p style="margin: 5px 0;">📅 ${new Date(date).toLocaleDateString(
-                "id-ID",
-                {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                }
-              )}</p>
+                  <div style="margin-bottom: 15px; font-family: sans-serif;">
+                    <h2 style="margin-bottom: 8px;">LAPORAN HARIAN TEH NYATAW</h2>
+                    <p style="margin: 5px 0;">📅 ${new Date(
+                      date
+                    ).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}</p>
 
-              <h3 style="margin: 15px 0 5px 0;">📊 Ringkasan Penjualan</h3>
-              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
-                <li>• Total Transaksi: ${dailyTransactions.length}</li>
-                <li>• Total Pendapatan: Rp${formatCurrency(totalRevenue)}</li>
-                <li>• Total Menu Dipesan: ${totalItemsOrdered}</li>
-              </ul>
+                    <h3 style="margin: 15px 0 5px 0;">📊 Ringkasan Penjualan</h3>
+                    <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                      <li>• Total Transaksi: ${dailyTransactions.length}</li>
+                      <li>• Total Pendapatan: Rp${formatCurrency(
+                        totalRevenue
+                      )}</li>
+                      <li>• Total Menu Dipesan: ${totalItemsOrdered}</li>
+                    </ul>
 
-              <h3 style="margin: 15px 0 5px 0;">💵 Pembayaran Tunai</h3>
-              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
-                <li>• Transaksi: ${cashTransactions.length}</li>
-                <li>• Total: Rp${formatCurrency(cashTotal)}</li>
-              </ul>
+                    <h3 style="margin: 15px 0 5px 0;">💵 Pembayaran Tunai</h3>
+                    <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                      <li>• Transaksi: ${cashTransactions.length}</li>
+                      <li>• Total: Rp${formatCurrency(cashTotal)}</li>
+                    </ul>
 
-              <h3 style="margin: 15px 0 5px 0;">📱 Pembayaran QRIS</h3>
-              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
-                <li>• Transaksi: ${qrisTransactions.length}</li>
-                <li>• Total: Rp${formatCurrency(qrisTotal)}</li>
-              </ul>
+                    <h3 style="margin: 15px 0 5px 0;">📱 Pembayaran QRIS</h3>
+                    <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                      <li>• Transaksi: ${qrisTransactions.length}</li>
+                      <li>• Total: Rp${formatCurrency(qrisTotal)}</li>
+                    </ul>
 
-              <h3 style="margin: 15px 0 5px 0;">📋 Detail Penjualan Produk</h3>
-              <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
-          `;
+                    <h3 style="margin: 15px 0 5px 0;">📋 Detail Penjualan Produk</h3>
+                    <ul style="list-style-type: none; padding-left: 10px; margin: 5px 0;">
+                `;
 
           // Tambahkan detail penjualan per item
           for (const itemName in itemCounts) {
@@ -1044,28 +1118,30 @@
           }
 
           reportHTML += `</ul></div>
-            <div>
-              <h3>Detail Transaksi:</h3>
-            </div>
-          `;
+                  <div>
+                    <h3>Detail Transaksi:</h3>
+                  </div>
+                `;
 
           // Tambahkan detail setiap transaksi
           dailyTransactions.forEach((trans, index) => {
             reportHTML += `
-              <div class="report-item">
-                <strong>${trans.id}</strong> - ${new Date(
+                    <div class="report-item">
+                      <strong>${trans.id}</strong> - ${new Date(
               trans.date
             ).toLocaleString("id-ID", {
               hour: "2-digit",
               minute: "2-digit",
             })}<br>
-                Kasir: ${trans.cashier}<br>
-                Customer: ${trans.customer}<br>
-                Metode: ${trans.paymentMethod === "qris" ? "QRIS" : "Tunai"}<br>
-                Total: Rp${formatCurrency(trans.total)}<br>
-                <strong>Item:</strong>
-                <ul style="margin-top: 5px; padding-left: 20px;">
-            `;
+                      Kasir: ${trans.cashier}<br>
+                      Customer: ${trans.customer}<br>
+                      Metode: ${
+                        trans.paymentMethod === "qris" ? "QRIS" : "Tunai"
+                      }<br>
+                      Total: Rp${formatCurrency(trans.total)}<br>
+                      <strong>Item:</strong>
+                      <ul style="margin-top: 5px; padding-left: 20px;">
+                  `;
 
             // Count item untuk transaksi ini
             const transItemCounts = {};
@@ -1587,7 +1663,62 @@
       }
 
       // Fungsi untuk menghasilkan data yang akan dicetak dengan kompatibilitas yang lebih baik
-      function generatePrintData(invoiceNumber) {
+
+      // Fungsi untuk mengkonversi gambar ke bitmap ESC/POS
+      async function convertImageToEscPosBitmap(url) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxWidth = 384; // Max width for 58mm printer in pixels (8 dots/mm * 48mm)
+            const scale = maxWidth / img.width;
+            canvas.width = maxWidth;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Convert to grayscale and then to monochrome bitmap
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+            const pixels = imageData.data;
+            const threshold = 127;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Each row is width pixels, each pixel is 1 bit in ESC/POS bitmap
+            // We need to pack 8 pixels per byte horizontally
+            const bytesPerRow = Math.ceil(width / 8);
+            const bitmap = new Uint8Array(bytesPerRow * height);
+
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+                // Convert to grayscale
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                // Monochrome threshold
+                const bit = gray < threshold ? 1 : 0;
+                if (bit) {
+                  bitmap[y * bytesPerRow + (x >> 3)] |= 0x80 >> x % 8;
+                }
+              }
+            }
+
+            resolve({ bitmap, width, height, bytesPerRow });
+          };
+          img.onerror = (e) => reject(e);
+          img.src = url;
+        });
+      }
+
+      async function generatePrintData(invoiceNumber) {
         // Dapatkan waktu saat ini
         const now = new Date();
         const dateString = now.toLocaleString("id-ID", {
@@ -1620,7 +1751,43 @@
         let printData = INIT; // Initialize printer
         printData += CENTER; // Center alignment
 
-        // Tambahkan header
+        // Tambahkan logo gambar sebagai bitmap ESC/POS
+        try {
+          const { bitmap, width, height, bytesPerRow } =
+            await convertImageToEscPosBitmap("logoo.png");
+
+          // GS v 0 command to print raster bit image
+          // Format: GS v 0 m xL xH yL yH d1...dk
+          // m = 0 (normal)
+          // xL, xH = width in pixels / 8 (low byte, high byte)
+          // yL, yH = height in pixels (low byte, high byte)
+          const xL = bytesPerRow & 0xff;
+          const xH = (bytesPerRow >> 8) & 0xff;
+          const yL = height & 0xff;
+          const yH = (height >> 8) & 0xff;
+
+          printData +=
+            GS +
+            "v" +
+            "\x00" +
+            String.fromCharCode(xL) +
+            String.fromCharCode(xH) +
+            String.fromCharCode(yL) +
+            String.fromCharCode(yH);
+
+          // Append bitmap data as characters
+          for (let i = 0; i < bitmap.length; i++) {
+            printData += String.fromCharCode(bitmap[i]);
+          }
+
+          // Add some line feeds after image
+          printData += "\n\n";
+        } catch (error) {
+          console.error("Error loading or converting logo image:", error);
+          // If error, just continue without logo
+        }
+
+        // Tambahkan header teks
         // printData +=
         //   DOUBLE_HEIGHT + BOLD_ON + "Teh NyaTAW\n" + NORMAL_SIZE + BOLD_OFF;
         // printData += "PizzaLebar-Mojokerto\n\n";
